@@ -30,7 +30,7 @@ class Webscraper:       # classe die alle data gaat vinden en formatten
                         time_of_day.append(None)        # None has to be added so that the other data stays in sync
 
                 # get the temp
-                temp = data_block.find('div', class_='text-secondary')
+                temp = data_block.find('span', class_='text-secondary')
                 if temp:        # if it contains data
                     temp_of_time.append(temp.text)
                 else:
@@ -38,17 +38,32 @@ class Webscraper:       # classe die alle data gaat vinden en formatten
 
                 # get the rain
                 rain_div = data_block.find('div', class_='flex items-center gap-1 text-secondary h-8')
-                if rain_div:
+                if rain_div:        # if the container of the data contains something
                     rain_span = rain_div.find('span', class_='text-sm')
-                    if rain_span:
+                    if rain_span:   # just checking if the data is valid
                         rain_of_time.append(rain_span.text)
                     else:
                         rain_of_time.append(None)
                 else:
                     rain_of_time.append(None)
 
-                # continue here. remember to add comments to the previous code
-                # the current data that is getting fetched is not yet filtered
+            # filtering the data
+            i = 0
+            while i < len(time_of_day):
+                # if all the data in the index is invalid
+                if not time_of_day[i] and not temp_of_time[i] and not rain_of_time[i]:
+                    # remove the data
+                    time_of_day.pop(i)
+                    temp_of_time.pop(i)
+                    rain_of_time.pop(i)
+                i += 1
+
+            # formatting the data
+            data_to_return = {}
+            for i in range(len(time_of_day)):
+                data_to_return[time_of_day[i]] = dict(temp=temp_of_time[i], rain=rain_of_time[i])
+
+            return data_to_return
 
     def use_driver(self, wanted_data):     # mijn google driver openen
         service = Service(ChromeDriverManager().install())  # de manager voor je google driver
@@ -56,9 +71,11 @@ class Webscraper:       # classe die alle data gaat vinden en formatten
         driver.get(url=self.location)   # opend de opgegeven pagina
 
         html = driver.page_source   # de volledige html code van de pagina
-        self.soup = bs(html, 'lxml') # maakt het makkelijk om de html te lezen
+        self.soup = bs(html, 'lxml')    # maakt het makkelijk om de html te lezen
 
+        returned_data = []
         for func in wanted_data:
-            func()  # run every function that we need
+            returned_data.append(func())  # run every function that we need
 
         driver.quit()
+        return returned_data # forwarding the data
