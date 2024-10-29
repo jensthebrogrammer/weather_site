@@ -1,4 +1,4 @@
-from bs4 import BeautifulSoup as bs
+from bs4 import BeautifulSoup as Bs
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
@@ -101,7 +101,7 @@ class Webscraper:       # classe die alle data gaat vinden en formatten
             driver.get(url=self.location)   # opend de opgegeven pagina
 
             html = driver.page_source   # de volledige html code van de pagina
-            self.soup = bs(html, 'lxml')    # maakt het makkelijk om de html te lezen
+            self.soup = Bs(html, 'lxml')    # maakt het makkelijk om de html te lezen
         except Exception as e:
             print(f'the following error occurred when booting the driver: {e}')
             quit()
@@ -112,6 +112,6 @@ class Webscraper:       # classe die alle data gaat vinden en formatten
                 returned_data.append(func())  # run every function that we need
 
             driver.quit()
-            return returned_data # forwarding the data
+            return returned_data    # forwarding the data
         except Exception as e:
             print(f'the following error occurred when executing the scraping functions: {e}')
