@@ -21,61 +21,97 @@ class Webscraper:       # classe die alle data gaat vinden en formatten
         for scroll_bar in data_container:   # scroll_bar is the scrolling bar on the site
             bar = scroll_bar.find_all('div', class_='items-center')     # one of the bars
             for data_block in bar:      # a single block in the scrolling bar
-                # get the time
-                time_ = data_block.find('span', class_='text-sm')
-                for a_time in time_:
-                    if a_time and len(a_time.text) > 4:     # to filter out the wrong data
-                        time_of_day.append(a_time.text)
+                try:
+                    # get the time
+                    time_ = data_block.find('span', class_='text-sm')
+                    for a_time in time_:
+                        if a_time and len(a_time.text) > 4:     # to filter out the wrong data
+                            time_of_day.append(a_time.text)
+                        else:
+                            time_of_day.append(None)        # None has to be added so that the other data stays in sync
+                except Exception as e:
+                    print(f'the following error occurred when trying to get the times: {e}')
+                    return
+
+                try:
+                    # get the temp
+                    temp = data_block.find('span', class_='text-secondary')
+                    if temp:        # if it contains data
+                        temp_of_time.append(temp.text)
                     else:
-                        time_of_day.append(None)        # None has to be added so that the other data stays in sync
+                        temp_of_time.append(None)
+                except Exception as e:
+                    print(f'the following error occurred when trying to get the temps: {e}')
+                    return
 
-                # get the temp
-                temp = data_block.find('span', class_='text-secondary')
-                if temp:        # if it contains data
-                    temp_of_time.append(temp.text)
-                else:
-                    temp_of_time.append(None)
-
-                # get the rain
-                rain_div = data_block.find('div', class_='flex items-center gap-1 text-secondary h-8')
-                if rain_div:        # if the container of the data contains something
-                    rain_span = rain_div.find('span', class_='text-sm')
-                    if rain_span:   # just checking if the data is valid
-                        rain_of_time.append(rain_span.text)
+                try:
+                    # get the rain
+                    rain_div = data_block.find('div', class_='flex items-center gap-1 text-secondary h-8')
+                    if rain_div:        # if the container of the data contains something
+                        rain_span = rain_div.find('span', class_='text-sm')
+                        if rain_span:   # just checking if the data is valid
+                            rain_of_time.append(rain_span.text)
+                        else:
+                            rain_of_time.append(None)
                     else:
                         rain_of_time.append(None)
-                else:
-                    rain_of_time.append(None)
+                except Exception as e:
+                    print(f'the following error occurred when trying to get the rain data: {e}')
+                    return
 
-            # filtering the data
-            i = 0
-            while i < len(time_of_day):
-                # if all the data in the index is invalid
-                if not time_of_day[i] and not temp_of_time[i] and not rain_of_time[i]:
-                    # remove the data
-                    time_of_day.pop(i)
-                    temp_of_time.pop(i)
-                    rain_of_time.pop(i)
-                i += 1
+            try:
+                # filtering the data
+                i = 0
+                while i < len(time_of_day):
+                    # if all the data in the index is invalid
+                    if not time_of_day[i] and not temp_of_time[i] and not rain_of_time[i]:
+                        # remove the data
+                        time_of_day.pop(i)
+                        temp_of_time.pop(i)
+                        rain_of_time.pop(i)
+                    i += 1
 
-            # formatting the data
-            data_to_return = {}
-            for i in range(len(time_of_day)):
-                data_to_return[time_of_day[i]] = dict(temp=temp_of_time[i], rain=rain_of_time[i])
+                # formatting the data
+                data_to_return = {}
+                for i in range(len(time_of_day)):
+                    data_to_return[time_of_day[i]] = dict(temp=temp_of_time[i], rain=rain_of_time[i])
 
-            return data_to_return
+                return data_to_return
+            except Exception as e:
+                print(f'the following error occurred when trying to format the data: {e}')
+                return
+
+    def get_graph_data(self):
+        try:
+            rain_graph = self.soup.find_all('svg', class_='graph-svg')
+            for element in rain_graph:
+                rain_path = element.find_all('path')
+                for data in rain_path:
+                    graph_data = data.get('d')
+
+                    return graph_data
+        except Exception as e:
+            print(f'the following error occurred when trying to get the graph data: {e}')
+            return None
 
     def use_driver(self, wanted_data):     # mijn google driver openen
-        service = Service(ChromeDriverManager().install())  # de manager voor je google driver
-        driver = webdriver.Chrome(service=service)  # opend de google driver voor de url op te zoeken
-        driver.get(url=self.location)   # opend de opgegeven pagina
+        try:
+            service = Service(ChromeDriverManager().install())  # de manager voor je google driver
+            driver = webdriver.Chrome(service=service)  # opend de google driver voor de url op te zoeken
+            driver.get(url=self.location)   # opend de opgegeven pagina
 
-        html = driver.page_source   # de volledige html code van de pagina
-        self.soup = bs(html, 'lxml')    # maakt het makkelijk om de html te lezen
+            html = driver.page_source   # de volledige html code van de pagina
+            self.soup = bs(html, 'lxml')    # maakt het makkelijk om de html te lezen
+        except Exception as e:
+            print(f'the following error occurred when booting the driver: {e}')
+            quit()
 
-        returned_data = []
-        for func in wanted_data:
-            returned_data.append(func())  # run every function that we need
+        try:
+            returned_data = []
+            for func in wanted_data:
+                returned_data.append(func())  # run every function that we need
 
-        driver.quit()
-        return returned_data # forwarding the data
+            driver.quit()
+            return returned_data # forwarding the data
+        except Exception as e:
+            print(f'the following error occurred when executing the scraping functions: {e}')
