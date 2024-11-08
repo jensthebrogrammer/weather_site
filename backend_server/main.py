@@ -7,7 +7,7 @@ from flask import request, jsonify
 from webscraper.webscraper import Webscraper
 
 
-@app.route("/get_day_weather", methods=['GET'])
+@app.route("/get_day_weather", methods=['POST'])
 def get_day_weather():
     url = request.json.get("url")
 
@@ -20,7 +20,7 @@ def get_day_weather():
         print(f'the following error occurred while getting the requested data: {e}')
         return jsonify({'message': "a problem occurred"}), 400
 
-    return jsonify({"data": data}), 200
+    return jsonify({"message": "success", "data": data}), 200
 
 
 if __name__ == "__main__":
