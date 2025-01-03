@@ -7,10 +7,12 @@ import './App.css'
 function App() {
   return (
     <>
+    {/*using the router to route between pages*/}
       <Router>
         <Routes>
           <Route 
             path="/"
+            // the loading page
             element={<Homepage />}
           />
 
