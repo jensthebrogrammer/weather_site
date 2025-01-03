@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 
 
 export default function Homepage() {
-    // this code is expirimental. i'm generating html using js
-    const navBarBtns = ["btn1", 'btn2', 'btn3', 'btn4']
+  // this code is expirimental. i'm generating html using js
+  const navBarBtns = ["btn1", 'btn2', 'btn3', 'btn4']
 
   return (<>
     {/* this is the container for the nav bar */}
