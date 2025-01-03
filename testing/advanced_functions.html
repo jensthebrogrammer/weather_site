@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>functions</title>
+    <style>
+      /*this is css code for making the page look better and adding colors*/
+    </style>
+  </head>
+
+  <body>
+    <!--in the body we put everyting that is on the page like the buttons. but also the js code inside of the script. the script runs when you load the page-->
+    
+    <script>
+      // put your js here
+      /*
+      function greeting() {
+        console.log("hello");
+      }
+
+      console.log(typeof greeting);
+
+      const num = 2;
+      const function1 = function () {
+        console.log("hello2");
+      };
+
+      function1();
+      */
+      function hello() {console.log("hello, world");}
+
+      const object1 = {
+        num: 2,
+        fun: hello,
+        fun2: () => {
+          alert('hello, world!')
+        }
+      }
+
+      setTimeout(function(){
+        console.log("test");
+      }, 3000);
+
+      setTimeout(object1.fun, 5000);
+    </script>
+  </body>
+</html>
+
