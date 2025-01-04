@@ -7,9 +7,10 @@ import './App.css'
 function App() {
   // getting the data of the backend upon loading
   useEffect(() => {
-    const data = fetchData()
-    console.log(data)
+    fetchData()
   }, [])  // the empty array is to make sure it loads only once
+
+  const [backendData, setBackendData] = useState()
 
   const fetchData = async () => {
     // giving the data that the backend needs
@@ -27,9 +28,11 @@ function App() {
     // getting the data from the backend
     const response = await fetch(url, options)
     const data = await response.json()
-    console.log(data.message)
 
-    return data.data
+    setBackendData(data.data)
+
+    console.log(data.message)
+    console.log(backendData)
   }
 
   return (
