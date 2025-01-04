@@ -8,9 +8,13 @@ function App() {
   // getting the data of the backend upon loading
   useEffect(() => {
     fetchData()
+    console.log(backendData)
   }, [])  // the empty array is to make sure it loads only once
 
-  const [backendData, setBackendData] = useState()
+  // setting the backend data
+  // if there is stored data in the local storage, then it uses that. if it's empty (first load) then it just stores an empty object
+  const [backendData, setBackendData] = useState(JSON.parse(localStorage.getItem('backendData')) || {})
+  localStorage.setItem('backendData', JSON.stringify(backendData))
 
   const fetchData = async () => {
     // giving the data that the backend needs
@@ -29,7 +33,9 @@ function App() {
     const response = await fetch(url, options)
     const data = await response.json()
 
+    // properly storing the backend data. local storage is used to ensure that upon reloading there is already data to be used
     setBackendData(data.data)
+    localStorage.setItem('backendData', JSON.stringify(backendData))
 
     console.log(data.message)
     console.log(backendData)
