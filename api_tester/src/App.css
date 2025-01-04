@@ -1,0 +1,22 @@
+body {
+  background-color: #002060; /* Dark blue background */
+  color: white;
+  font-family: Arial, sans-serif;
+}
+.graph-container {
+  width: 100%;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+svg {
+  background-color: #003E80; /* Slightly lighter blue for graph background */
+  width: 90%;
+  height: 100%;
+  border-radius: 10px;
+}
+.line {
+  fill: #00A0E3; /* Blue fill for the graph */
+  stroke: none;
+}
