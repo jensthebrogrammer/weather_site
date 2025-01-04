@@ -8,7 +8,6 @@ function App() {
   // getting the data of the backend upon loading
   useEffect(() => {
     fetchData()
-    console.log(backendData)
   }, [])  // the empty array is to make sure it loads only once
 
   // setting the backend data
