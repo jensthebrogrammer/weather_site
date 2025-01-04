@@ -9,7 +9,7 @@ function App() {
   useEffect(() => {
     const data = fetchData()
     console.log(data)
-  })
+  }, [])  // the empty array is to make sure it loads only once
 
   const fetchData = async () => {
     // giving the data that the backend needs
