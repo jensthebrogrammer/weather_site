@@ -12,8 +12,12 @@ function App() {
 
   // setting the backend data
   // if there is stored data in the local storage, then it uses that. if it's empty (first load) then it just stores an empty object
-  const [backendData, setBackendData] = useState(JSON.parse(localStorage.getItem('backendData')) || {})
+  const [backendData, setBackendData] = useState(JSON.
+    parse(localStorage.getItem('backendData')) || {})
   localStorage.setItem('backendData', JSON.stringify(backendData))
+
+  // i'm giving the homepage a changable key here so i can reload the homepage without triggering useEffect
+  const [homeKey, setHomeKey] = useState(0)
 
   const fetchData = async () => {
     // giving the data that the backend needs
@@ -35,6 +39,8 @@ function App() {
     // properly storing the backend data. local storage is used to ensure that upon reloading there is already data to be used
     setBackendData(data.data)
     localStorage.setItem('backendData', JSON.stringify(backendData))
+    // making sure the site loads the new data
+    setHomeKey(homeKey + 1) // changing the key triggers the reloading of the page
 
     console.log(data.message)
     console.log(backendData)
@@ -48,7 +54,7 @@ function App() {
           <Route 
             path="/"
             // the loading page
-            element={<Homepage />}
+            element={<Homepage key={homeKey}/>}
           />
 
           <Route 
