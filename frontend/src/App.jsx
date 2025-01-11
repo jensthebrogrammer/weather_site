@@ -43,7 +43,6 @@ function App() {
     setHomeKey(homeKey + 1) // changing the key triggers the reloading of the page
 
     console.log(data.message)
-    console.log(backendData)
   }
 
   return (
@@ -54,7 +53,7 @@ function App() {
           <Route 
             path="/"
             // the loading page
-            element={<Homepage key={homeKey}/>}
+            element={<Homepage data={backendData} key={homeKey}/>}
           />
 
           <Route 

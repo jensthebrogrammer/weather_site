@@ -2,9 +2,10 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 
-export default function Homepage() {
+export default function Homepage({data}) {
   // this code is expirimental. i'm generating html using js
   const navBarBtns = ["btn1", 'btn2', 'btn3', 'btn4']
+  console.log(data)
 
   return (<>
     {/* this is the container for the nav bar */}
