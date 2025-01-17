@@ -22,20 +22,21 @@ class Webscraper:       # classe die alle data gaat vinden en formatten
                 bar = scroll_bar.find_all('div', class_='items-center')     # one of the bars
                 for data_block in bar:      # a single block in the scrolling bar
                     time = data_block.find('span', class_='text-sm') or None
-                    time = (time and data_block.
-                            find('span', class_='text-sm').text.strip())
+                    time = time and time.text.strip()
 
                     rain = (data_block.find('div', class_='flex items-center gap-1 text-secondary h-8')
                             or None)
-                    rain = (rain and data_block.
-                            find('div', class_='flex items-center gap-1 text-secondary h-8').text.strip())
+                    rain = rain and rain.text.strip()
+
+                    image = (data_block.find('img', class_='h-10 w-10 inline-block select-none align-top mt-4')
+                             or None)
+                    image = image and image.get('src')
 
                     temparature = data_block.find('span', class_='text-secondary') or None
-                    temparature = (temparature and data_block.
-                                   find('span', class_='text-secondary').text.strip())
+                    temparature = temparature and temparature.text.strip()
 
                     if len(time) == 5:
-                        data_map[time] = {'temp': temparature, 'rain': rain}
+                        data_map[time] = {'temp': temparature, 'rain': rain, 'img': image}
 
             except Exception as e:
                 print(f'an error occured while mapping the data: {e}')
@@ -54,6 +55,15 @@ class Webscraper:       # classe die alle data gaat vinden en formatten
         except Exception as e:
             print(f'the following error occurred when trying to get the graph data: {e}')
             return None
+
+    def get_wind_direction(self):
+        container = self.soup.find("div", class_='flex flex-col gap-2')
+        data_block = container.find('div', class_="flex flex-row items-center")
+        wind_direct_block = data_block.find('span', class_="text-md inline-block mr-2")
+        wind_text = wind_direct_block.text.strip()
+        wind_img = data_block.find('img', class_='w-6').get('src')
+
+        return {"wind-text": wind_text, "wind-img": wind_img}
 
     def use_driver(self, wanted_data):     # mijn google driver openen
         try:

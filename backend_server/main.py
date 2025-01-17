@@ -12,7 +12,7 @@ def get_day_weather():
     url = request.json.get("url")
 
     scraper = Webscraper(url)
-    actions = [scraper.get_daily_forecast, scraper.get_graph_data]
+    actions = [scraper.get_daily_forecast, scraper.get_graph_data, scraper.get_wind_direction]
 
     try:
         data = scraper.use_driver(actions)
