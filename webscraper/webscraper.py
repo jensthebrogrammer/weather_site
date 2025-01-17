@@ -34,21 +34,23 @@ class Webscraper:       # classe die alle data gaat vinden en formatten
                     temparature = (temparature and data_block.
                                    find('span', class_='text-secondary').text.strip())
 
-                    data_map[time] = {'temp': temparature, 'rain': rain}
+                    if len(time) == 5:
+                        data_map[time] = {'temp': temparature, 'rain': rain}
+
             except Exception as e:
                 print(f'an error occured while mapping the data: {e}')
+                return None
 
             return data_map
 
     def get_graph_data(self):
         try:
-            rain_graph = self.soup.find_all('svg', class_='graph-svg')
-            for element in rain_graph:
-                rain_path = element.find_all('path')
-                for data in rain_path:
-                    graph_data = data.get('d')
+            rain_graph = self.soup.find('svg', class_='graph-svg')
+            rain_path = rain_graph.find('path')
+            graph_data = rain_path.get('d')
 
-                    return graph_data
+            return graph_data
+
         except Exception as e:
             print(f'the following error occurred when trying to get the graph data: {e}')
             return None
