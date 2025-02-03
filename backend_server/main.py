@@ -5,6 +5,7 @@
 from config import app
 from flask import request, jsonify
 from webscraper.webscraper import Webscraper
+from models import UniqueIcons
 
 
 @app.route("/get_day_weather", methods=['POST'])
@@ -16,6 +17,9 @@ def get_day_weather():
 
     try:
         data = scraper.use_driver(actions)
+
+        # data_uniqueIcons = UniqueIcons.query.all()
+
     except Exception as e:
         print(f'the following error occurred while getting the requested data: {e}')
         return jsonify({'message': "a problem occurred"}), 400
