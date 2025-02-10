@@ -5,7 +5,7 @@
 from config import app
 from flask import request, jsonify
 from webscraper.webscraper import Webscraper
-from models import UniqueIcons
+# from models import UniqueIcons
 
 
 @app.route("/get_day_weather", methods=['POST'])
