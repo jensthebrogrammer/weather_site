@@ -6,9 +6,6 @@ classDiagram
         - __driver_open: bool
         - __file_name: str
         - __driver: WebDriver
-        - __options: Options
-        - __proxy: str
-        - __user_agent: str
 
         + url: str
         + file_name: str
@@ -23,5 +20,5 @@ classDiagram
         + driver_off(): void
         + __save(content: dict): void
     }
-
 ````
+
