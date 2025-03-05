@@ -5,19 +5,34 @@ from webdriver_manager.chrome import ChromeDriverManager
 from collections import defaultdict
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions as ec
+import time
+
+# i'm adding some settings that make this bot harder to detect
+from selenium.webdriver.chrome.options import Options
+
+options = Options()
+options.add_argument("--disable-blink-features=AutomationControlled")  # Prevent bot detection
+options.add_argument("--headless")  # Run in the background (optional)
+options.add_argument("--log-level=3")  # Reduce log spam
+options.add_argument("--disable-gpu")  # Improves performance
+options.add_argument("--no-sandbox")  # Bypass some security settings
+options.add_argument("--disable-dev-shm-usage")  # Prevent crashes
 
 
 class Webscraper:
     def __init__(self, url, file_name):
-        # url is not a private because the only way to check if the url is valid is to
-        # open it in the driver and that would slow down the process a lot
-        self.url = url
+        # i made url private so i can reboot the driver anytime the user changes the url
+        # i don't use it to validate the url because there is no concrete way to know that the url is valid
+        self.__url = url
 
         # defining some privates
         self.__file_name = None
         self.__set_file_name(file_name)
         self.__driver_open = False  # om te voorkomen dat de driver meerdere keren geopend word
+
+        # defining the driver
+        self.__driver = None
 
         # root and target are for knowing in which part of the HTML u are
         # i'm not sure if i need to define a root here since i am always gonna fetch the HTML again
@@ -26,11 +41,26 @@ class Webscraper:
         self.__root = None
 
     @property
+    def url(self):
+        return self.__url
+
+    # when the url is changed, the driver will reboot and use the correct url
+    @url.setter
+    def url(self, value):
+        self.__url = value
+
+        # reboot the driver with delay to make sure the driver fully shuts down first
+        self.driver_off()
+        time.sleep(0.5)
+        self.driver_on()
+
+    @property
     def file_name(self):
         return self.__file_name
 
     @file_name.setter
     def file_name(self, name):
+        # ifinstance checks if it is the right type of value
         if isinstance(name, str) and len(name) > 0:
             self.__file_name = name
         else:
@@ -39,51 +69,43 @@ class Webscraper:
     def __set_file_name(self, file_name):
         self.file_name = file_name
 
-    # this function always has to be used when scraping because this opens a google browser
-    # the function saves the root in a variabel so you don't have to scrape while the driver is open.
-    # however if you want you can do it via an argument in case it should ever become needed
-    def use_driver(self, func=None):
-        # if the driver is not opened
+    # the user needs to turn of the driver if he wants to use the scraping functions
+    def driver_on(self):
+        # if the driver is already open the function won't do anything
         if not self.__driver_open:
             try:
                 service = Service(ChromeDriverManager().install())  # de manager voor je google driver
-                driver = webdriver.Chrome(service=service)  # opend de google driver voor de url op te zoeken
+                self.__driver = webdriver.Chrome(service=service)  # opend de google driver voor de url op te zoeken
+
+                # setting the driver as open
                 self.__driver_open = True
-                driver.get(url=self.url)   # opend de opgegeven pagina
-                WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.CLASS_NAME, "scroll-content"))
+
+                self.__driver.get(url=self.url)   # opend de opgegeven pagina
+                WebDriverWait(self.__driver, 10).until(
+                    ec.presence_of_element_located((By.CLASS_NAME, "scroll-content"))
                 )
 
-                html = driver.page_source   # de volledige html code van de pagina
+                html = self.__driver.page_source   # de volledige html code van de pagina
                 self.__root = Bs(html, 'lxml')    # maakt het makkelijk om de html te lezen
             except Exception as e:
                 print(f'the following error occurred when booting the driver: {e}')
                 quit()
 
+    def driver_off(self):
+        # it will only try to shut down if the driver is open
+        if self.__driver_open:
             try:
-                # if a function is passed
-                if func:
-                    # we gebruiken de ingegeven variabel als een functie
-                    data = func()
-                    driver.quit()
-                    self.__driver_open = False
-                    return data
-                else:
-                    driver.quit()
-                    self.__driver_open = False
-                    return
-
+                self.__driver.quit()
+                self.__driver_open = False
             except Exception as e:
-                print(f'the following error occurred while executing the function: {e}')
-        else:
-            print("the driver is already open")
-            return
+                print(f"an error occured while shuting down the driver: {e}")
 
     def get_daily_forecast(self):
         # if the root isn't updated yet
         if not self.__root:
-            # updating the root with the driver
-            self.use_driver()
+            # if the root is empty, then that means that the driver hasn't been turned on yet
+            # i'm not sure what the best thing to do is then, but for now i just turn it on myself
+            self.driver_on()
 
         # make sure i'm in the right part of the html
         location = self.__root.find(id="block-10694")
@@ -103,8 +125,7 @@ class Webscraper:
     def get_wind_direction(self):
         # if the root isn't updated yet
         if not self.__root:
-            # updating the root with the driver
-            self.use_driver()
+            self.driver_on()
 
         container = self.__root.find("div", class_='flex flex-col gap-2')
         data_block = container.find('div', class_="flex flex-row items-center")
@@ -180,12 +201,12 @@ class Webscraper:
                 time_tag = bar.find('span', class_='text-sm')
                 # the special if statement is to make sure that it doesn't try to run
                 # the strip() function on a Null
-                time = time_tag.text.strip() if time_tag else None
+                time_stamp = time_tag.text.strip() if time_tag else None
 
                 # Ensure valid time format before adding data
                 # the html element of the time and the rain look the same so
                 # we are making sure that we don't mix them up
-                if time and len(time) == 5:
+                if time and len(time_stamp) == 5:
                     rain_container = bar.find('div', class_='flex items-center gap-1 text-secondary')
                     rain_tag = rain_container.find('span', class_='text-sm') if rain_container else None
                     rain = rain_tag.text.strip() if rain_tag else None
@@ -197,7 +218,7 @@ class Webscraper:
                     temperature = temp_tag.text.strip() if temp_tag else None
 
                     # make a single piece of data
-                    data_map[time] = {'temp': temperature, 'rain': rain, 'img': image}
+                    data_map[time_stamp] = {'temp': temperature, 'rain': rain, 'img': image}
 
             except Exception as e:
                 print(f'An error occurred while mapping data: {e}')
@@ -217,4 +238,3 @@ class Webscraper:
                 document.write("\n\n\n")
         except Exception as e:
             print(f"something went wrong while saving to a file: {e}")
-
