@@ -12,11 +12,14 @@ from webscraper.webscraper import Webscraper
 def get_day_weather():
     url = request.json.get("url")
 
-    scraper = Webscraper(url)
-    actions = [scraper.get_daily_forecast, scraper.get_graph_data, scraper.get_wind_direction]
+    scraper = Webscraper(url, "../testing/test_file_name.txt")
 
     try:
-        data = scraper.use_driver(actions)
+        scraper.use_driver()
+        data = {
+            "today": scraper.get_daily_forecast(),
+            "week": scraper.get_weekly_weather()
+        }
 
         # data_uniqueIcons = UniqueIcons.query.all()
 

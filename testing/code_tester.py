@@ -1,16 +1,33 @@
-from webscraper.webscraper import Webscraper
+import time
 
 
-def testing_webscraper():
-    my_scraper = Webscraper('https://www.buienalarm.nl/belgie/arendonk/23100')
+def testing_scraper():
+    from webscraper.webscraper import Webscraper
 
-    wanted_data = [my_scraper.get_daily_forecast, my_scraper.get_graph_data, my_scraper.get_wind_direction]
-    data = my_scraper.use_driver(wanted_data)
-    for key, value in data[0].items():
+    my_scraper = Webscraper('https://www.buienalarm.nl/belgie/arendonk/23100', "test_file_name.txt")
+
+    my_scraper.use_driver()
+    data = my_scraper.get_daily_forecast()
+    graph = my_scraper.get_graph_data()
+    weekly_forecast = my_scraper.get_weekly_weather()
+
+    for key, value in data["timeTable"].items():
         print(f'{key}: {value}')
 
-    print(f'this is the graph data {data[1]}')
-    print(data[2])
+    print(data["windDirection"])
+
+    print(graph)
+
+    for i in range(7):
+        print(f"day{i+1}")
+        for value in weekly_forecast[f"day{i+1}"].items():
+            print(value)
+
+        print("\n\n\n\n")
 
 
-testing_webscraper()
+start = time.time()
+testing_scraper()
+stop = time.time()
+
+print(stop-start)
