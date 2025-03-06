@@ -5,7 +5,7 @@
 from config import app
 from flask import request, jsonify
 from webscraper.webscraper import Webscraper
-# from models import UniqueIcons
+from models import UniqueIcons, DayWeather, WeekData, PreFetch
 
 
 @app.route("/get_day_weather", methods=['POST'])
@@ -15,13 +15,11 @@ def get_day_weather():
     scraper = Webscraper(url, "../testing/test_file_name.txt")
 
     try:
-        scraper.use_driver()
+        scraper.driver_on()
         data = {
             "today": scraper.get_daily_forecast(),
             "week": scraper.get_weekly_weather()
         }
-
-        # data_uniqueIcons = UniqueIcons.query.all()
 
     except Exception as e:
         print(f'the following error occurred while getting the requested data: {e}')
