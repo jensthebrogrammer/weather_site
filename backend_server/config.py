@@ -10,7 +10,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False    # we gaan de modificatie
 app.config["SQLALCHEMY_BINDS"] = {
     'unique_icons': 'sqlite:///unique_icons.db',     # maakt een extra database voor de icons
     'dayWeather': 'sqlite:///dayWeather.db',
-    'preFetch': 'sqlite:///unique_icons.db',
+    'preFetch': 'sqlite:///preFetch.db',
     'week_data': 'sqlite:///week_data.db'
 }
 

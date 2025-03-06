@@ -26,7 +26,7 @@ class UniqueIcons(db.Model):
     __bind_key__ = "unique_icons"
 
     id = db.Column(db.Integer, primary_key=True)
-    event = db.Column(db.String(40), primary_key=True)
+    event = db.Column(db.String(40), unique=True, nullable=False)
     icon = db.Column(db.String(300), nullable=False)
 
     def to_json(self):
@@ -36,33 +36,25 @@ class UniqueIcons(db.Model):
         }
 
 
-class PreFetch(db.model):
+class PreFetch(db.Model):
     __bind_key__ = "preFetch"
 
     # in all these different villages, there is going to one DayWeather stored
     # this will make the data quickly available
     id = db.Column(db.Integer, primary_key=True)
-    arendonk = db.Column(PickleType, primary_key=True)
-    mol = db.Column(PickleType, primary_key=True)
-    retie = db.Column(PickleType, primary_key=True)
-    dessel = db.Column(PickleType, primary_key=True)
-    geel = db.Column(PickleType, primary_key=True)
+    data = db.Column(PickleType, nullable=False)
 
     def to_json(self):
         return {
-            "arendonk": self.arendonk,
-            'mol': self.mol,
-            'retie': self.retie,
-            'dessel': self.dessel,
-            'geel': self.geel
+            "data": self.data
         }
 
 
-class WeekData(db.model):
+class WeekData(db.Model):
     __bind_key__ = "week_data"
 
-    id = db.Column(db.Integers, primary_key=True)
-    location = db.Column(db.String(100), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    location = db.Column(db.String(100), nullable=False, unique=True)
     date = db.Column(db.String(30), nullable=False)
     day1 = db.Column(PickleType, nullable=False)
     day2 = db.Column(PickleType, nullable=False)
