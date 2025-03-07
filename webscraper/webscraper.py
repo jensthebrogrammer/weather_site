@@ -51,7 +51,7 @@ class Webscraper:
 
         # reboot the driver with delay to make sure the driver fully shuts down first
         self.driver_off()
-        time.sleep(0.5)
+        time.sleep(3)
         self.driver_on()
 
     @property
@@ -138,6 +138,12 @@ class Webscraper:
 
     # this code gets a string of data from the site that can be used to make a graph
     def get_graph_data(self):
+        # if the root isn't updated yet
+        if not self.__root:
+            # if the root is empty, then that means that the driver hasn't been turned on yet
+            # i'm not sure what the best thing to do is then, but for now i just turn it on myself
+            self.driver_on()
+
         try:
             rain_graph = self.__root.find('svg', class_='graph-svg')
             rain_path = rain_graph.find('path')
@@ -152,6 +158,12 @@ class Webscraper:
             return None
 
     def get_weekly_weather(self):
+        # if the root isn't updated yet
+        if not self.__root:
+            # if the root is empty, then that means that the driver hasn't been turned on yet
+            # i'm not sure what the best thing to do is then, but for now i just turn it on myself
+            self.driver_on()
+
         # this line finds the specific container i am looking for
         location = self.__root.find(id="block-10719")
         # this is the place where i can loop trough the content

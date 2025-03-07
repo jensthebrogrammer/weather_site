@@ -1,7 +1,7 @@
 from config import app, db
 from flask import request, jsonify
 from webscraper.webscraper import Webscraper
-from models import UniqueIcons, DayWeather, WeekData, PreFetch
+from models import DayWeather, WeekData, PreFetch
 import threading
 import time
 from datetime import datetime
@@ -34,17 +34,17 @@ def short_cycle():
                 week_data = scraper.get_weekly_weather()
 
                 # making the prefetch
-                if PreFetch.query.get(value[1]):
+                if PreFetch.query.filter_by(_id=value[1]).first():
                     try:
                         # replace the old data
-                        data_to_alter = PreFetch.query.get(value[1])    # finding the right id
+                        data_to_alter = PreFetch.query.filter_by(_id=value[1]).first()    # finding the right id
                         data_to_alter.data = DayWeather(
                                                 location=key,
                                                 date=datetime.today().date(),
                                                 graph_string=graph_data,
                                                 time_table=day_data["timeTable"],
                                                 wind_direction=day_data['windDirection']
-                                            )
+                                            ).to_json()
 
                         # updating the database
                         db.session.commit()
@@ -54,15 +54,16 @@ def short_cycle():
                     try:
                         # making a single piece of data
                         new_pre_fetch = PreFetch(
-                            id=value[1],    # manualy setting the id so i can find it back
                             data=DayWeather(
                                 location=key,
                                 date=datetime.today().date(),
                                 graph_string=graph_data,
                                 time_table=day_data["timeTable"],
                                 wind_direction=day_data['windDirection']
-                            )
+                            ).to_json()
                         )
+
+                        new_pre_fetch._id = value[1]
 
                         # adding the new data to the database
                         db.session.add(new_pre_fetch)
@@ -70,14 +71,11 @@ def short_cycle():
                     except Exception as e:
                         print(f'something went wrong while trying to add a new prefetch: {e}')
 
-                # making sure bot doesn't go to fast
-                time.sleep(random.randint(1, 2))
-
                 # updating the weekdata database
-                if WeekData.query.get(value[1]):
+                if WeekData.query.filter_by(_id=value[1]).first():
                     try:
                         # replace the old data
-                        data_to_alter = WeekData.query.get(value[1])    # finding the right id
+                        data_to_alter = WeekData.query.filter_by(_id=value[1]).first()    # finding the right id
                         data_to_alter.location = key
                         data_to_alter.date = datetime.today().date()
 
@@ -97,7 +95,6 @@ def short_cycle():
                     try:
                         # making a new piece of weekdata
                         new_week_data = WeekData(
-                            id=value[1],    # manualy setting the id so i can find it back
                             location=key,
                             date=datetime.today().date(),
                             day1=week_data["day1"],
@@ -109,14 +106,19 @@ def short_cycle():
                             day7=week_data["day7"]
                         )
 
+                        new_week_data._id = value[1]
+
                         # adding the new piece of data to the database
                         db.session.add(new_week_data)
                         db.session.commit()
                     except Exception as e:
                         print(f'something went wrong while trying to add new weekdata: {e}')
 
+                # making sure bot doesn't go to fast
+                time.sleep(random.randint(4, 7)*60 + random.randint(4, 59))
+
             # randomizing the delay to make it look human
-            random_delay = random.randint(12, 18)*60 + random.randint(1, 59)
+            random_delay = random.randint(6, 8)*60 + random.randint(1, 59)
             time.sleep(random_delay)
 
 
@@ -147,5 +149,25 @@ def get_day_weather():
     return jsonify({"message": "success", "data": data}), 200
 
 
+@app.route("/pre_fetch", methods=["GET"])
+def pre_fetch():
+    data = PreFetch.query.all()
+    passed_data = list(map(lambda x: x.to_json(), data))
+    print(passed_data)
+
+    return jsonify({"data": passed_data}), 200
+
+
+@app.route("/week_data_vieuw", methods=["GET"])
+def week_data_vieuw():
+    data = WeekData.query.all()
+    passed_data = list(map(lambda x: x.to_json(), data))
+    print(passed_data)
+
+    return jsonify({"data": passed_data}), 200
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    with app.app_context():
+        db.create_all()
+        app.run(debug=True)
