@@ -1,3 +1,6 @@
+# i'm going to declare 3 different scrapers. one for the short cycle, one for the long one
+# and one for the server itself. this way these pieces of code can work independedly
+
 from config import app, db
 from flask import request, jsonify
 from webscraper.webscraper import Webscraper
@@ -12,6 +15,7 @@ import random
 scraper = Webscraper('https://www.buienalarm.nl/belgie/arendonk/23100', "../testing/test_file_name.txt")
 
 # making location so i can fabricate urls easier
+# the numbers are for defining the id's of the data
 locations = {
     "arendonk": ['/arendonk/23100', 23100],
     "mol": ["/mol/13899", 13899],
@@ -21,20 +25,24 @@ locations = {
 }
 
 
+# this piece of code is responsible for fetchening the data every few minutes
+# so that there is always fresh data available for these locations
 def short_cycle():
     # keep looping
     while True:
         with app.app_context():  # Zorg ervoor dat SQLAlchemy correct werkt binnen een thread
             # looping trough every location
             for key, value in locations.items():
+                # when the url of the scraper is changed the scraper automaticly reboots the driver into the right url
                 scraper.url = "https://www.buienalarm.nl/belgie" + value[0]
 
+                # fetching the data
                 day_data = scraper.get_daily_forecast()
                 graph_data = scraper.get_graph_data()
                 week_data = scraper.get_weekly_weather()
 
                 # making the prefetch
-                if PreFetch.query.filter_by(_id=value[1]).first():
+                if PreFetch.query.filter_by(_id=value[1]).first():  # if there is already some data there
                     try:
                         # replace the old data
                         data_to_alter = PreFetch.query.filter_by(_id=value[1]).first()    # finding the right id
@@ -51,6 +59,7 @@ def short_cycle():
                     except Exception as e:
                         print(f'something went wrong while altering the prefetch: {e}')
                 else:
+                    # if there is no data with this id yet
                     try:
                         # making a single piece of data
                         new_pre_fetch = PreFetch(
@@ -63,6 +72,7 @@ def short_cycle():
                             ).to_json()
                         )
 
+                        # setting the id manually
                         new_pre_fetch._id = value[1]
 
                         # adding the new data to the database
@@ -76,6 +86,8 @@ def short_cycle():
                     try:
                         # replace the old data
                         data_to_alter = WeekData.query.filter_by(_id=value[1]).first()    # finding the right id
+
+                        # setting the location and date
                         data_to_alter.location = key
                         data_to_alter.date = datetime.today().date()
 
@@ -128,6 +140,7 @@ thread1 = threading.Thread(target=short_cycle, daemon=True)
 thread1.start()
 
 
+# this code still needs to reviewed and changed
 @app.route("/get_day_weather", methods=['POST'])
 def get_day_weather():
     url = request.json.get("url")
@@ -149,25 +162,29 @@ def get_day_weather():
     return jsonify({"message": "success", "data": data}), 200
 
 
+# a route to get the pre_fetch data
 @app.route("/pre_fetch", methods=["GET"])
 def pre_fetch():
+    # getting all the available data
     data = PreFetch.query.all()
+
+    # this line turns all the data in the right json format
     passed_data = list(map(lambda x: x.to_json(), data))
-    print(passed_data)
 
     return jsonify({"data": passed_data}), 200
 
 
+# take a look at pre_fetch()
 @app.route("/week_data_vieuw", methods=["GET"])
 def week_data_vieuw():
     data = WeekData.query.all()
     passed_data = list(map(lambda x: x.to_json(), data))
-    print(passed_data)
 
     return jsonify({"data": passed_data}), 200
 
 
 if __name__ == "__main__":
+    # the app needs this context line in order to run db.create_all
     with app.app_context():
         db.create_all()
         app.run(debug=True)

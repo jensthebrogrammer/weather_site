@@ -21,7 +21,7 @@ options.add_argument("--disable-dev-shm-usage")  # Prevent crashes
 
 
 class Webscraper:
-    def __init__(self, url, file_name):
+    def __init__(self, url, file_name, save=False):
         # i made url private so i can reboot the driver anytime the user changes the url
         # i don't use it to validate the url because there is no concrete way to know that the url is valid
         self.__url = url
@@ -39,6 +39,9 @@ class Webscraper:
         # after the user wants data
         # however i'm keeping it in in case i ever add a functionality that doesn't need to fetch again
         self.__root = None
+
+        # disable or enable saving
+        self.__enable_save = save
 
     @property
     def url(self):
@@ -242,11 +245,13 @@ class Webscraper:
         return data_map  # Ensure return of dictionary
 
     def __save(self, content):
-        try:
-            with open(self.file_name, 'a') as document:
-                for key, value in content.items():
-                    document.write(f'{key}: {value}\n')
+        # only do it if the user enabled it
+        if self.__enable_save:
+            try:
+                with open(self.file_name, 'a') as document:
+                    for key, value in content.items():
+                        document.write(f'{key}: {value}\n')
 
-                document.write("\n\n\n")
-        except Exception as e:
-            print(f"something went wrong while saving to a file: {e}")
+                    document.write("\n\n\n")
+            except Exception as e:
+                print(f"something went wrong while saving to a file: {e}")
