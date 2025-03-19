@@ -63,7 +63,7 @@ class Webscraper:
 
     @file_name.setter
     def file_name(self, name):
-        # ifinstance checks if it is the right type of value
+        # if instance checks if it is the right type of value
         if isinstance(name, str) and len(name) > 0:
             self.__file_name = name
         else:
@@ -74,8 +74,10 @@ class Webscraper:
 
     # the user needs to turn of the driver if he wants to use the scraping functions
     def driver_on(self):
+        count = 0
         # if the driver is already open the function won't do anything
-        if not self.__driver_open:
+        # i made it a while so that if it runs into any trouble it tries again
+        while not self.__driver_open and count <= 4:
             try:
                 service = Service(ChromeDriverManager().install())  # de manager voor je google driver
                 self.__driver = webdriver.Chrome(service=service)  # opend de google driver voor de url op te zoeken
@@ -92,7 +94,9 @@ class Webscraper:
                 self.__root = Bs(html, 'lxml')    # maakt het makkelijk om de html te lezen
             except Exception as e:
                 print(f'the following error occurred when booting the driver: {e}')
-                quit()
+
+                # i am using a count here so that doesn't go on forever
+                count += 1
 
     def driver_off(self):
         # it will only try to shut down if the driver is open
@@ -213,7 +217,8 @@ class Webscraper:
         # loops trough the list of bars
         for bar in bars:
             try:
-                time_tag = bar.find('span', class_='text-sm')
+                time_and_rain = bar.find_all('span', class_='text-sm')
+                time_tag = time_and_rain[0]
                 # the special if statement is to make sure that it doesn't try to run
                 # the strip() function on a Null
                 time_stamp = time_tag.text.strip() if time_tag else None
@@ -222,9 +227,11 @@ class Webscraper:
                 # the html element of the time and the rain look the same so
                 # we are making sure that we don't mix them up
                 if time and len(time_stamp) == 5:
-                    rain_container = bar.find('div', class_='flex items-center gap-1 text-secondary')
-                    rain_tag = rain_container.find('span', class_='text-sm') if rain_container else None
-                    rain = rain_tag.text.strip() if rain_tag else None
+                    if len(time_and_rain) == 2:
+                        rain_container = time_and_rain[1]
+                        rain = rain_container.text.strip() if rain_container else None
+                    else:
+                        rain = None
 
                     weather_icon = bar.find('img', class_='h-10 w-10 inline-block select-none align-top mt-4')
                     image = weather_icon['src'] if weather_icon else None  # Extract image URL
