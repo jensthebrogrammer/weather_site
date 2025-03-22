@@ -9,12 +9,14 @@ import threading
 import time
 from datetime import datetime
 import random
+import schedule
 
 
-# initialize the websraper
-scraper = Webscraper('https://www.buienalarm.nl/belgie/arendonk/23100', "../testing/test_file_name.txt")
+# initialize the websrapers
+scraper_short_cycle = Webscraper('https://www.buienalarm.nl/belgie/arendonk/23100', "../testing/test_file_name.txt")
+scraper_server = Webscraper('https://www.buienalarm.nl/belgie/arendonk/23100', "../testing/test_file_name.txt")
 
-# making location so i can fabricate urls easier
+# making the locations, so I can fabricate urls easier
 # the numbers are for defining the id's of the data
 locations = {
     "arendonk": ['/arendonk/23100', 23100],
@@ -34,12 +36,12 @@ def short_cycle():
             # looping trough every location
             for key, value in locations.items():
                 # when the url of the scraper is changed the scraper automaticly reboots the driver into the right url
-                scraper.url = "https://www.buienalarm.nl/belgie" + value[0]
+                scraper_short_cycle.url = "https://www.buienalarm.nl/belgie" + value[0]
 
                 # fetching the data
-                day_data = scraper.get_daily_forecast()
-                graph_data = scraper.get_graph_data()
-                week_data = scraper.get_weekly_weather()
+                day_data = scraper_short_cycle.get_daily_forecast()
+                graph_data = scraper_short_cycle.get_graph_data()
+                week_data = scraper_short_cycle.get_weekly_weather()
 
                 # making the prefetch
                 if PreFetch.query.filter_by(_id=value[1]).first():  # if there is already some data there
@@ -140,19 +142,106 @@ thread1 = threading.Thread(target=short_cycle, daemon=True)
 thread1.start()
 
 
-# this code still needs to reviewed and changed
+# making the daily cycle
+def daily_fetch():
+    # looping trough every location
+    for key, value in locations:
+        # getting the right data in json format
+        weather_data = PreFetch.query.filter_by(_id=value[1]).first().to_json()
+
+        # defining the data pieces
+        graph_string = weather_data.data.graph_string
+        time_table = weather_data.data.time_table
+        wind_direction = weather_data.data.wind_direction
+
+        # putting the data in the right format
+        # the id gets assigned by sql because its teh primary key
+        data_to_add = DayWeather(
+            location=key,
+            date=datetime.today().date(),
+            graph_string=graph_string,
+            time_table=time_table,
+            wind_direction=wind_direction
+        )
+
+        # adding the data
+        db.session.add(data_to_add)
+
+    # I only commit when all the data is processed
+    db.session.commit()
+
+
+# schedule makes it run a function every day
+schedule.every().day.at("09:00").do(daily_fetch)
+
+
+# this cycle only check if it the next day yet
+def long_cycle():
+    while True:
+        schedule.run_pending()
+        time.sleep(120)
+
+
+# start the thread. this makes a piece of code run seperately
+thread2 = threading.Thread(target=long_cycle, daemon=True)
+# starting the thread
+thread2.start()
+
+
+def verify_url_id(url):
+    list_url = list(url)
+    string_id = ""
+
+    for i in range(5):
+        string_id += list_url[-(i+1)]
+
+    list_url.reverse()  # Reverse the list in place
+    id_location = int(''.join(list_url))  # Join the strings and convert to an integer
+
+    for key, value in locations.items():
+        if id_location == value:
+            return value[1]
+
+    return False
+
+
+# this route is used when someone wants to access weather data
+# if the wanted data is in the pre_fetch it will get it there
+# if not, it wil get it via the scraper
 @app.route("/get_day_weather", methods=['POST'])
 def get_day_weather():
+    # get the url the user is trying to access
     url = request.json.get("url")
 
+    # checking if the url is in the pre_fetch
+    verification = verify_url_id(url)
+
+    # if it is, this code will run
+    if verification:
+        try:
+            # use the pre_fetch to get the data
+            today = PreFetch.query.filter_by(_id=verification).first().to_json()
+            week = WeekData.query.filter_by(_id=verification).first().to_json()
+
+            # putting it in a font
+            data = {
+                'today': today,
+                "week": week
+            }
+
+            return jsonify({"data": data, "message": "success"})
+        except Exception as e:
+            print(f"something went wrong while trying to access the pre_fetch: {e}")
+
     # changing the url of the scraper
-    scraper.url = url
+    scraper_server.url = url
 
     try:
-        scraper.driver_on()
+        # getting the data manually
+        scraper_short_cycle.driver_on()
         data = {
-            "today": scraper.get_daily_forecast(),
-            "week": scraper.get_weekly_weather()
+            "today": scraper_server.get_daily_forecast(),
+            "week": scraper_server.get_weekly_weather()
         }
 
     except Exception as e:
