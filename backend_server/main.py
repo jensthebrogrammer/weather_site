@@ -40,7 +40,6 @@ def short_cycle():
 
                 # fetching the data
                 day_data = scraper_short_cycle.get_daily_forecast()
-                graph_data = scraper_short_cycle.get_graph_data()
                 week_data = scraper_short_cycle.get_weekly_weather()
 
                 # making the prefetch
@@ -51,7 +50,7 @@ def short_cycle():
                         data_to_alter.data = DayWeather(
                                                 location=key,
                                                 date=datetime.today().date(),
-                                                graph_string=graph_data,
+                                                graph_string=day_data["rain_graph"],
                                                 time_table=day_data["timeTable"],
                                                 wind_direction=day_data['windDirection']
                                             ).to_json()
@@ -68,7 +67,7 @@ def short_cycle():
                             data=DayWeather(
                                 location=key,
                                 date=datetime.today().date(),
-                                graph_string=graph_data,
+                                graph_string=day_data["timeTable"],
                                 time_table=day_data["timeTable"],
                                 wind_direction=day_data['windDirection']
                             ).to_json()
@@ -193,13 +192,10 @@ def verify_url_id(url):
     string_id = ""
 
     for i in range(5):
-        string_id += list_url[-(i+1)]
-
-    list_url.reverse()  # Reverse the list in place
-    id_location = int(''.join(list_url))  # Join the strings and convert to an integer
+        string_id += list_url[-5 + i]
 
     for key, value in locations.items():
-        if id_location == value:
+        if int(string_id) == value[1]:
             return value[1]
 
     return False
@@ -270,6 +266,14 @@ def week_data_vieuw():
     passed_data = list(map(lambda x: x.to_json(), data))
 
     return jsonify({"data": passed_data}), 200
+
+
+@app.route("/get_dayweather", methods=['GET'])
+def get_dayweather():
+    data = DayWeather.query.all()
+    passed_data = list(map(lambda x: x.to_json(), data))
+
+    return jsonify({"data": passed_data})
 
 
 if __name__ == "__main__":

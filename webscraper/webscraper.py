@@ -121,7 +121,8 @@ class Webscraper:
         data_container = location.find('div', class_='flex overflow-x-scroll')
         data_map = {
                 "timeTable": self.__scrape_scroll_bar(data_container),
-                "windDirection": self.get_wind_direction()
+                "windDirection": self.get_wind_direction(),
+                "rain_graph": self.get_graph_data()
             }
 
         # write to a file for seperate use
