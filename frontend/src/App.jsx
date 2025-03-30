@@ -42,7 +42,7 @@ function App() {
     // making sure the site loads the new data
     setHomeKey(homeKey + 1) // changing the key triggers the reloading of the page
 
-    console.log(data.message)
+    console.log(data)
   }
 
   return (

@@ -50,7 +50,7 @@ def short_cycle():
                         data_to_alter.data = DayWeather(
                                                 location=key,
                                                 date=datetime.today().date(),
-                                                graph_string=day_data["rain_graph"],
+                                                graph_string=day_data["graphString"],
                                                 time_table=day_data["timeTable"],
                                                 wind_direction=day_data['windDirection']
                                             ).to_json()
@@ -67,7 +67,7 @@ def short_cycle():
                             data=DayWeather(
                                 location=key,
                                 date=datetime.today().date(),
-                                graph_string=day_data["timeTable"],
+                                graph_string=day_data["graphString"],
                                 time_table=day_data["timeTable"],
                                 wind_direction=day_data['windDirection']
                             ).to_json()
@@ -221,7 +221,7 @@ def get_day_weather():
 
             # putting it in a font
             data = {
-                'today': today,
+                'today': today["data"],
                 "week": week
             }
 

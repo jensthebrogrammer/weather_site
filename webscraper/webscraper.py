@@ -122,7 +122,7 @@ class Webscraper:
         data_map = {
                 "timeTable": self.__scrape_scroll_bar(data_container),
                 "windDirection": self.get_wind_direction(),
-                "rain_graph": self.get_graph_data()
+                "graphString": self.get_graph_data()
             }
 
         # write to a file for seperate use

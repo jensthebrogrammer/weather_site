@@ -23,7 +23,7 @@ function App() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        url: 'https://www.buienalarm.nl/belgie/witgoor/2778415',
+        url: 'https://www.buienalarm.nl/belgie/arendonk/23100',
       }),
     };
 
@@ -33,8 +33,8 @@ function App() {
       const response = await fetch(url, options);
       const data = await response.json();
 
-      if (data.data.today.rain_graph) {
-        setGraphData(data.data.today.rain_graph);
+      if (data.data.today.graphString) {
+        setGraphData(data.data.today.graphString);
         setGraphKey((prevKey) => prevKey + 1);
       }
 
@@ -46,7 +46,6 @@ function App() {
 
   const buttonClicked = async () => {
     console.log("The button was clicked");
-    console.log("Current Graph Data:", graphData);
 
     const data = await fetch_data();
     console.log("Fetched Data:", data);
