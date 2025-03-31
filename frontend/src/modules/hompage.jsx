@@ -1,5 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import GridBar from "./gridBar";
+import "/Users/35257/PycharmProjects/weather_app/frontend/src/App.css"
 
 
 export default function Homepage({data}) {
@@ -24,6 +26,23 @@ export default function Homepage({data}) {
           })
         }
       </div>
+    </div>
+    
+    <div className="container">
+      {
+        // this code is suposed to show the weather of today in a grid
+        Object.keys(data.today.timeTable).map(key => {
+          return (
+            <GridBar 
+              key={key}
+              time={key}
+              temp={data.today.timeTable[key].temp}
+              rain={data.today.timeTable[key].rain}
+              img={data.today.timeTable[key].img}
+            />
+          )
+        })
+      }
     </div>
   </>)
 }

@@ -1,0 +1,14 @@
+.row_daily_weather {
+  border-style: solid;
+  border-color: black;
+  border-top-width: 3px;
+
+  height: 40px;
+}
+
+.col_daily_weather {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}

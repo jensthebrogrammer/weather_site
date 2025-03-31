@@ -171,7 +171,8 @@ def daily_fetch():
 
 
 # schedule makes it run a function every day
-schedule.every().day.at("09:00").do(daily_fetch)
+# i've set it to midnight because get_daily_forecast is for the next 24 ours
+schedule.every().day.at("00:05").do(daily_fetch)
 
 
 # this cycle only check if it the next day yet
