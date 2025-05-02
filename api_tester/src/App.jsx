@@ -23,7 +23,7 @@ function App() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        url: 'https://www.buienalarm.nl/belgie/arendonk/23100',
+        url: 'https://www.buienalarm.nl/belgie/witgoor/2778415',
       }),
     };
 

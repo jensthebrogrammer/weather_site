@@ -2,13 +2,19 @@
   border-style: solid;
   border-color: black;
   border-top-width: 3px;
+  border-bottom-width: 0px;
 
-  height: 40px;
+  width: 350px;
+  height: 100px;
+
+  margin: 0px;
+}
+
+.row_daily_weather:hover {
+  background-color: lightgrey;
 }
 
 .col_daily_weather {
   display: flex;
-  align-items: center;
   justify-content: center;
-  text-align: center;
 }

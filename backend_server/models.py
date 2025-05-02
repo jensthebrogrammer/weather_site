@@ -10,7 +10,7 @@ class DayWeather(db.Model):
     date = db.Column(db.String(30), nullable=False)
     graph_string = db.Column(db.String(3000))
     time_table = db.Column(PickleType, nullable=False)
-    wind_direction = db.Column(db.String(100))
+    wind_direction = db.Column(PickleType)
 
     def __init__(self, location, date, graph_string, time_table, wind_direction):
         self.location = location

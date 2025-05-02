@@ -177,7 +177,7 @@ class Webscraper:
         # this is the place where i can loop trough the content
         container = location.find('div', class_='flex flex-col mt-4')
 
-        data_to_return = defaultdict(object)    # om de data in op te slagen
+        data_to_return = defaultdict(dict)    # om de data in op te slagen
 
         # vind alle scrollbars van de week en zet het in een lijst
         days = container.find_all('div', class_='day mt-4')
@@ -195,6 +195,9 @@ class Webscraper:
     def __scrape_scroll_bar(container):
         # where all the sraped data gets mapped to
         data_map = {}
+
+        # to keep track of wich element got scraped when
+        scrape_index = 0
 
         # check if the passed container is not Null
         if not container:
@@ -240,8 +243,11 @@ class Webscraper:
                     temp_tag = bar.find('span', class_='text-secondary')
                     temperature = temp_tag.text.strip() if temp_tag else None
 
+                    # icrease the scrape index
+                    scrape_index += 1
+
                     # make a single piece of data
-                    data_map[time_stamp] = {'temp': temperature, 'rain': rain, 'img': image}
+                    data_map[scrape_index] = {"time": time_stamp, 'temp': temperature, 'rain': rain, 'img': image}
 
             except Exception as e:
                 print(f'An error occurred while mapping data: {e}')

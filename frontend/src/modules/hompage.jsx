@@ -8,6 +8,8 @@ export default function Homepage({data}) {
   // this code is expirimental. i'm generating html using js
   const navBarBtns = ["btn1", 'btn2', 'btn3', 'btn4']
 
+  console.log(data)
+
   return (<>
     {/* this is the container for the nav bar */}
     <div className="nav-bar text-center bg-primary">
@@ -28,14 +30,14 @@ export default function Homepage({data}) {
       </div>
     </div>
     
-    <div className="container">
+    <div className="container m-0 p-3">
       {
         // this code is suposed to show the weather of today in a grid
         Object.keys(data.today.timeTable).map(key => {
           return (
             <GridBar 
               key={key}
-              time={key}
+              time={data.today.timeTable[key].time}
               temp={data.today.timeTable[key].temp}
               rain={data.today.timeTable[key].rain}
               img={data.today.timeTable[key].img}
