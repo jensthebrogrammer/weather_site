@@ -1,8 +1,4 @@
 .row_daily_weather {
-  border-style: solid;
-  border-color: black;
-  border-top-width: 3px;
-  border-bottom-width: 0px;
 
   width: 350px;
   height: 100px;
@@ -17,4 +13,10 @@
 .col_daily_weather {
   display: flex;
   justify-content: center;
+}
+
+.scroll-container {
+  height: 100vh;               /* Volledige schermhoogte */
+  overflow-y: auto;            /* Scrollen als nodig */
+  width: 360px;
 }

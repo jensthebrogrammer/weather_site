@@ -34,7 +34,6 @@ function App() {
 
   if (backendData) {
     page = <Homepage data={backendData} key={homeKey} />
-    console.log(backendData)
   }
 
   const fetchData = async () => {
@@ -54,8 +53,6 @@ function App() {
 
     setBackendData(data.data) // update React state
     setHomeKey(prev => prev + 1) // force Homepage to re-render with new data
-
-    console.log(data)
   }
 
   return (
