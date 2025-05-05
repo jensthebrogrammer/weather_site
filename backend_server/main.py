@@ -187,19 +187,23 @@ thread2 = threading.Thread(target=long_cycle, daemon=True)
 # starting the thread
 thread2.start()
 
-
+# fix the verification of foreign adresses
 def verify_url_id(url):
-    list_url = list(url)
-    string_id = ""
+    try:
+        list_url = list(url)
+        string_id = ""
 
-    for i in range(5):
-        string_id += list_url[-5 + i]
+        for i in range(5):
+            string_id += list_url[-5 + i]
 
-    for key, value in locations.items():
-        if int(string_id) == value[1]:
-            return value[1]
+        for key, value in locations.items():
+            if int(string_id) == value[1]:
+                return value[1]
 
-    return False
+        return False
+    except Exception as e:
+        print(f"foreign adrres found: {e}")
+        return False
 
 
 # this route is used when someone wants to access weather data
