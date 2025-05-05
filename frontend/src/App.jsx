@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Homepage from './modules/hompage';
 import Testing from './modules/tesing_page';
 import Loading_screen from './modules/loading_screen';
+import { fetchData } from './scripts/usingData';
 import './App.css';
 
 function App() {
@@ -29,30 +30,16 @@ function App() {
 
   // Fetch data from backend once on initial load
   useEffect(() => {
-    fetchData()
+    fetchData(setBackendData, setHomeKey, "dessel")
   }, [])
 
   if (backendData) {
-    page = <Homepage data={backendData} key={homeKey} />
-  }
-
-  const fetchData = async () => {
-    const options = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json", // tells the server the request body is JSON
-      },
-      body: JSON.stringify({
-        url: 'https://www.buienalarm.nl/belgie/arendonk/23100'
-      }),
-    }
-
-    const url = 'http://127.0.0.1:5000/get_day_weather'
-    const response = await fetch(url, options)
-    const data = await response.json()
-
-    setBackendData(data.data) // update React state
-    setHomeKey(prev => prev + 1) // force Homepage to re-render with new data
+    page = (<Homepage
+            data={backendData}
+            key={homeKey} 
+            setBackendData={setBackendData}
+            setHomeKey={setHomeKey}
+           />)
   }
 
   return (

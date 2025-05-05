@@ -1,17 +1,29 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import GridBar from "./gridBar";
+import { useState } from "react";
+import { fetchData } from "../scripts/usingData";
 import "/Users/35257/PycharmProjects/weather_app/frontend/src/App.css"
 
 
-export default function Homepage({data}) {
+export default function Homepage({data, setBackendData, setHomeKey}) {
   // this code is expirimental. i'm generating html using js
-  const navBarBtns = ["btn1", 'btn2', 'btn3', 'btn4']
+  const navBarBtns = ["btn1", 'btn2']
+  const [inputVal, SetInputVal] = useState("")
+
+  const onSubmit = (e) => {
+    e.preventDefault()
+    console.log(inputVal)
+
+    fetchData(setBackendData, setHomeKey, inputVal)
+
+    SetInputVal("")
+  }
 
   return (<>
     {/* this is the container for the nav bar */}
     <div className="nav-bar text-center bg-primary">
-      <div className="row">
+      <div className="row align-items-center">
         {
           // this code is experimental
           // i'm trying to render returning elements with less lines of code
@@ -25,6 +37,20 @@ export default function Homepage({data}) {
             )
           })
         }
+
+        <div className="col-4">
+          <form className="d-flex" role="search" onSubmit={onSubmit}>
+            <input 
+              className="form-control me-2" 
+              type="search" 
+              placeholder="Search" 
+              aria-label="Search"
+              value={inputVal}
+              onChange={(e) => {SetInputVal(e.target.value)}}
+            />
+            <button className="btn btn-outline-warning" type="submit">Search</button>
+          </form>
+        </div>
       </div>
     </div>
     

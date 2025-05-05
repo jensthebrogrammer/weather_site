@@ -187,22 +187,24 @@ thread2 = threading.Thread(target=long_cycle, daemon=True)
 # starting the thread
 thread2.start()
 
+
 # fix the verification of foreign adresses
 def verify_url_id(url):
     try:
-        list_url = list(url)
-        string_id = ""
+        # Extract the part of the URL that contains the location ID
+        list_url = url.rstrip('/').split('/')
+        location_part = list_url[-1]  # Get the last segment of the URL (e.g., "arendonk")
 
-        for i in range(5):
-            string_id += list_url[-5 + i]
+        # Check if the location part exists in locations dictionary
+        if location_part in locations.keys():
+            location_id = locations[location_part][1]  # Get the corresponding ID from the dictionary
 
-        for key, value in locations.items():
-            if int(string_id) == value[1]:
-                return value[1]
+            return location_id  # Return the location ID
 
         return False
+
     except Exception as e:
-        print(f"foreign adrres found: {e}")
+        print(f"Error occurred: {e}")
         return False
 
 
