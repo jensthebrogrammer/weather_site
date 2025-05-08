@@ -22,6 +22,7 @@ function App() {
   // Effect to persist backendData to localStorage when it changes
   useEffect(() => {
     localStorage.setItem('backendData', JSON.stringify(backendData));
+    console.log(backendData)
   }, [backendData])
 
   // Key to trigger re-render of Homepage
